@@ -7,7 +7,6 @@ An academic Human-Computer Interaction (HCI) usability evaluation and functional
 ## 🌐 Live Prototype & Links
 
 - **Live Interactive Website:** [https://salman-72-56.github.io/india-post-hci-redesign/](https://salman-72-56.github.io/india-post-hci-redesign/)
-- **GitHub Repository:** [https://github.com/Salman-72-56/india-post-hci-redesign](https://github.com/Salman-72-56/india-post-hci-redesign)
 - **Coursework:** Human-Computer Interaction (HCI)
 - **Author:** MD Salman
 
