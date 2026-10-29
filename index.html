@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>India Post - Human-Centered Portal Redesign Prototype</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Space Grotesk"', 'sans-serif']
+          },
+          colors: {
+            postRed: {
+              DEFAULT: '#C62828',
+              dark: '#9B1B1B',
+              light: '#EF4444',
+              surface: '#FEF2F2'
+            },
+            postGold: {
+              DEFAULT: '#D97706',
+              light: '#F59E0B',
+              bg: '#FEF3C7'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom accessibility focus & highlight rings */
+    *:focus-visible {
+      outline: 3px solid #F59E0B;
+      outline-offset: 2px;
+    }
+    /* Smooth transitions */
+    .tab-transition {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    /* HCI Badge Pulsing glow */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+    }
+    .hci-pin {
+      animation: pulse-ring 2.2s infinite;
+    }
+    .contrast-mode {
+      background-color: #000000 !important;
+      color: #FFFF00 !important;
+    }
+    .contrast-mode .bg-white,
+    .contrast-mode .bg-slate-50,
+    .contrast-mode .bg-gray-50 {
+      background-color: #121212 !important;
+      color: #FFFFFF !important;
+      border-color: #FFFF00 !important;
+    }
+    .contrast-mode a, .contrast-mode button {
+      color: #FFFF00 !important;
+    }
+  </style>
+</head>
+<body id="app-root" class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col selection:bg-postRed selection:text-white transition-all text-base">
+
+  <!-- ================= TOP HCI EVALUATION FLOATING BANNER ================= -->
+  <aside aria-label="HCI Inspector Control" class="sticky top-0 z-50 bg-slate-900 text-white shadow-xl border-b border-slate-700/80 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 font-semibold border border-red-500/40 text-[11px] uppercase tracking-wider">
+          <i class="fa-solid fa-microscope mr-1.5 text-red-400"></i>HCI Case Study Prototype
+        </span>
+        <span class="text-slate-300 hidden md:inline">
+          Interactive evaluation fixing <strong class="text-white">indiapost.gov.in</strong> cognitive bottlenecks
+        </span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button id="toggle-hci-btn" onclick="toggleHciInspector()" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition-all shadow-sm">
+          <i class="fa-solid fa-tags text-xs"></i>
+          <span id="hci-toggle-text">Enable HCI Inspector Mode</span>
+        </button>
+
+        <!-- Quick Heuristic Filter Dropdown -->
+        <select id="heuristic-filter" onchange="filterHeuristic(this.value)" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:border-amber-400">
+          <option value="all">All 5 HCI Fix Highlights</option>
+          <option value="status">#1 System Status Visibility</option>
+          <option value="world">#2 Real-World Match & Plain Speak</option>
+          <option value="error">#5 Error Prevention (No Captcha)</option>
+          <option value="minimal">#8 Aesthetic & Minimalist Design</option>
+          <option value="a11y">Universal Accessibility (WCAG 2.1)</option>
+        </select>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= ACCESSIBILITY & GOV STRIP ================= -->
+  <header class="bg-slate-100 border-b border-slate-200 text-slate-700 text-xs py-1.5 px-4 sm:px-6">
+    <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1 font-medium">
+          <i class="fa-solid fa-flag text-postRed"></i>
+          <span>Government of India &bull; Ministry of Communications</span>
+        </span>
+      </div>
+
+      <!-- Universal Accessibility Controls -->
+      <div class="flex items-center gap-4">
+        <!-- Font Size Scaler -->
+        <div class="flex items-center gap-1 bg-white border border-slate-200 rounded px-1.5 py-0.5" title="Adjust text size">
+          <span class="text-[11px] text-slate-500 mr-1 font-medium">Font:</span>
+          <button onclick="adjustFontSize(-1)" class="w-5 h-5 flex items-center justify-center font-bold hover:bg-slate-100 rounded" aria-label="Decrease font size">A-</button>
+          <button onclick="adjustFontSize(0)" class="w-5 h-5 flex items-center justify-center font-bold hover:bg-slate-100 rounded" aria-label="Reset font size">A</button>
+          <button onclick="adjustFontSize(1)" class="w-5 h-5 flex items-center justify-center font-bold hover:bg-slate-100 rounded" aria-label="Increase font size">A+</button>
+        </div>
+
+        <!-- High Contrast Mode Toggle -->
+        <button onclick="toggleHighContrast()" class="inline-flex items-center gap-1 bg-white border border-slate-200 hover:border-slate-400 px-2 py-0.5 rounded font-semibold text-slate-800 transition-colors" title="Toggle High Contrast for vision impairment">
+          <i class="fa-solid fa-circle-half-stroke text-amber-600"></i>
+          <span>Contrast</span>
+        </button>
+
+        <!-- Vernacular Language Picker -->
+        <div class="flex items-center gap-1">
+          <i class="fa-solid fa-language text-slate-500"></i>
+          <select id="lang-picker" onchange="changeLanguage(this.value)" class="bg-white border border-slate-200 rounded text-xs px-1.5 py-0.5 focus:ring-1 focus:ring-postRed">
+            <option value="en">English</option>
+            <option value="hi">हिंदी (Hindi)</option>
+            <option value="bn">বাংলা (Bengali)</option>
+            <option value="ta">தமிழ் (Tamil)</option>
+            <option value="te">తెలుగు (Telugu)</option>
+            <option value="mr">मराठी (Marathi)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN HEADER & BRAND NAVIGATION ================= -->
+  <nav class="bg-white border-b border-slate-200 shadow-sm relative z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
+      <!-- Logo Branding -->
+      <a href="#" class="flex items-center gap-3 group focus:outline-none">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-postRed to-postRed-dark flex items-center justify-center text-white shadow-md shadow-red-200 transform group-hover:scale-105 transition-transform">
+          <i class="fa-solid fa-envelope-open-text text-2xl"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-display font-extrabold text-2xl tracking-tight text-postRed">India Post</span>
+            <span class="text-xs font-bold uppercase bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded border border-amber-300">Dak Seva</span>
+          </div>
+          <p class="text-xs text-slate-500 font-medium">Dakghar &bull; Delivered for every citizen</p>
+        </div>
+      </a>
+
+      <!-- Primary Task-Focused Navigation (Flattened Hierarchy) -->
+      <div class="hidden lg:flex items-center gap-1">
+        <button class="px-3.5 py-2 text-sm font-semibold rounded-lg text-postRed bg-red-50 hover:bg-red-100 transition-colors">
+          Citizen Services
+        </button>
+        <button class="px-3.5 py-2 text-sm font-semibold rounded-lg text-slate-700 hover:text-postRed hover:bg-slate-50 transition-colors">
+          Banking &amp; Savings
+        </button>
+        <button class="px-3.5 py-2 text-sm font-semibold rounded-lg text-slate-700 hover:text-postRed hover:bg-slate-50 transition-colors">
+          Insurance (PLI)
+        </button>
+        <button class="px-3.5 py-2 text-sm font-semibold rounded-lg text-slate-700 hover:text-postRed hover:bg-slate-50 transition-colors">
+          Business Logistics
+        </button>
+        <button class="px-3.5 py-2 text-sm font-semibold rounded-lg text-slate-700 hover:text-postRed hover:bg-slate-50 transition-colors">
+          Philately
+        </button>
+      </div>
+
+      <!-- Quick Action Right Group -->
+      <div class="flex items-center gap-2">
+        <button onclick="switchTab('pin-tab')" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 px-3 py-2 rounded-lg transition-colors">
+          <i class="fa-solid fa-location-dot text-postRed"></i>
+          <span>Nearest Post Office</span>
+        </button>
+        <button class="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-postRed hover:bg-postRed-dark px-3.5 py-2 rounded-lg shadow-sm transition-all transform active:scale-95">
+          <i class="fa-solid fa-user-circle"></i>
+          <span>Citizen Portal</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ================= HERO SECTION WITH TASK-FIRST CONSOLE ================= -->
+  <main class="flex-grow">
+    <section class="relative bg-gradient-to-b from-red-50/70 via-white to-slate-50 pt-8 pb-14 border-b border-slate-200 overflow-hidden">
+      <!-- Subtle Decorative Background Shape -->
+      <div class="absolute inset-0 pointer-events-none opacity-40">
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-red-200/40 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/2 -left-20 w-80 h-80 bg-amber-200/40 rounded-full blur-3xl"></div>
+      </div>
+
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
+        <!-- Hero Tagline & Problem Statement Remedy -->
+        <div class="text-center max-w-3xl mx-auto mb-8">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 border border-red-200 text-postRed font-bold text-xs uppercase tracking-wide mb-3">
+            <i class="fa-solid fa-sparkles text-amber-600"></i> Frictionless Postal Experience
+          </div>
+          <h1 class="font-display text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            What would you like to do today?
+          </h1>
+          <p class="text-slate-600 text-sm sm:text-base mt-2">
+            Instant tracking, exact postal tariff calculations, and verified post office location without CAPTCHA roadblocks.
+          </p>
+        </div>
+
+        <!-- ================= THE TASK CONSOLE (CARDS & INTERACTIVE TABS) ================= -->
+        <div class="relative bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden" id="task-console">
+          
+          <!-- HCI ANNOTATION MARKER 1: Task-first Hub -->
+          <div class="hci-annotation hidden absolute top-3 right-3 z-30" data-hci-category="minimal">
+            <div class="group relative flex items-center">
+              <span class="hci-pin w-6 h-6 rounded-full bg-red-600 text-white font-bold text-xs flex items-center justify-center cursor-pointer shadow-lg">1</span>
+              <div class="absolute right-8 top-0 w-72 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                <p class="font-bold text-amber-400 mb-1">#8 Minimalist Design &amp; Task-First Hub</p>
+                <p class="text-slate-300">Replaced 40+ chaotic departmental links on original indiapost.gov.in homepage with a prominent 4-task citizen tabbed console based on actual user frequency.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Navigation Tabs Bar -->
+          <div class="grid grid-cols-2 md:grid-cols-4 bg-slate-100/90 border-b border-slate-200 p-1.5 gap-1.5" role="tablist">
+            <button id="btn-tab-track" onclick="switchTab('track-tab')" role="tab" aria-selected="true" class="tab-btn flex items-center justify-center gap-2.5 py-3 px-3 rounded-xl font-bold text-sm text-postRed bg-white shadow-sm border border-slate-200/80 transition-all">
+              <i class="fa-solid fa-satellite-dish text-base"></i>
+              <span>Track Consignment</span>
+            </button>
+            <button id="btn-tab-calc" onclick="switchTab('calc-tab')" role="tab" aria-selected="false" class="tab-btn flex items-center justify-center gap-2.5 py-3 px-3 rounded-xl font-semibold text-sm text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all">
+              <i class="fa-solid fa-calculator text-base"></i>
+              <span>Calculate Postage</span>
+            </button>
+            <button id="btn-tab-pin" onclick="switchTab('pin-tab')" role="tab" aria-selected="false" class="tab-btn flex items-center justify-center gap-2.5 py-3 px-3 rounded-xl font-semibold text-sm text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all">
+              <i class="fa-solid fa-map-location-dot text-base"></i>
+              <span>Find Pincode</span>
+            </button>
+            <button id="btn-tab-book" onclick="switchTab('book-tab')" role="tab" aria-selected="false" class="tab-btn flex items-center justify-center gap-2.5 py-3 px-3 rounded-xl font-semibold text-sm text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all">
+              <i class="fa-solid fa-truck-pickup text-base"></i>
+              <span>Schedule Pickup</span>
+            </button>
+          </div>
+
+          <!-- ================= TAB CONTENT PANELS ================= -->
+          <div class="p-5 sm:p-7">
+            
+            <!-- PANEL 1: TRACK CONSIGNMENT (Solved CAPTCHA + Stepper) -->
+            <div id="track-tab" class="tab-panel">
+              <div class="max-w-3xl mx-auto">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                  <label for="tracking-input" class="block font-bold text-sm text-slate-800">
+                    Consignment / Article Number
+                  </label>
+                  <div class="flex items-center gap-2 text-xs text-slate-500">
+                    <span>Try prefilled samples:</span>
+                    <button type="button" onclick="loadSampleTracking('IN982341902IN', 'delivered')" class="font-semibold text-postRed hover:underline bg-red-50 px-2 py-0.5 rounded border border-red-200">Delivered</button>
+                    <button type="button" onclick="loadSampleTracking('EK821034185IN', 'transit')" class="font-semibold text-amber-700 hover:underline bg-amber-50 px-2 py-0.5 rounded border border-amber-200">In Transit</button>
+                  </div>
+                </div>
+
+                <!-- Input group with inline validation and no CAPTCHA -->
+                <div class="relative">
+                  <div class="flex flex-col sm:flex-row gap-2">
+                    <div class="relative flex-grow">
+                      <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-barcode text-lg"></i>
+                      </div>
+                      <input type="text" id="tracking-input" maxlength="13" placeholder="e.g. EK123456789IN (13 characters)" 
+                             class="w-full pl-11 pr-24 py-3.5 rounded-xl border-2 border-slate-300 focus:border-postRed focus:ring-0 text-slate-900 text-base font-mono uppercase tracking-wider transition-colors"
+                             oninput="handleTrackingValidation(this.value)"
+                             onkeypress="if(event.key === 'Enter') trackConsignment();">
+                      <span id="char-counter" class="absolute inset-y-0 right-3 flex items-center text-xs font-mono text-slate-400">
+                        0/13
+                      </span>
+                    </div>
+
+                    <button onclick="trackConsignment()" class="bg-postRed hover:bg-postRed-dark text-white font-bold px-7 py-3.5 rounded-xl shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95 text-base">
+                      <i class="fa-solid fa-magnifying-glass"></i>
+                      <span>Track Now</span>
+                    </button>
+                  </div>
+
+                  <!-- Error & Helper Notice -->
+                  <div id="tracking-error" class="hidden mt-2 text-xs font-medium text-red-600 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span id="tracking-error-msg">Please enter a valid 13-character Indian postal tracking number.</span>
+                  </div>
+
+                  <!-- HCI ANNOTATION MARKER 2: CAPTCHA Removal -->
+                  <div class="hci-annotation hidden absolute -bottom-6 right-0" data-hci-category="error">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-300">
+                      <i class="fa-solid fa-shield-check"></i> HCI Fix #5: Removed friction-inducing Math CAPTCHA
+                    </span>
+                  </div>
+                </div>
+
+                <!-- DYNAMIC RESULT STAGE: Interactive Delivery Stepper -->
+                <div id="tracking-result-box" class="mt-8 border border-slate-200 rounded-2xl bg-slate-50/60 p-5 sm:p-6 transition-all hidden">
+                  <!-- Shipment Header Summary -->
+                  <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200">
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="font-mono font-bold text-lg text-slate-900" id="res-consignment-id">IN982341902IN</span>
+                        <span id="res-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">
+                          Delivered
+                        </span>
+                      </div>
+                      <p class="text-xs text-slate-500 mt-1">Booked at: <strong class="text-slate-700">New Delhi GPO (110001)</strong> &bull; Speed Post Article</p>
+                    </div>
+
+                    <div class="text-right">
+                      <span class="text-xs text-slate-500 block">Expected / Delivered On</span>
+                      <span class="font-bold text-sm text-slate-900" id="res-date">24 Oct, 03:40 PM</span>
+                    </div>
+                  </div>
+
+                  <!-- HCI ANNOTATION MARKER 3: Status Stepper -->
+                  <div class="relative">
+                    <div class="hci-annotation hidden absolute -top-4 right-0 z-20" data-hci-category="status">
+                      <span class="bg-amber-100 text-amber-900 text-[11px] font-bold px-2 py-0.5 rounded border border-amber-300">
+                        <i class="fa-solid fa-eye mr-1"></i> HCI Fix #1: Visibility of System Status (Stepped Progress)
+                      </span>
+                    </div>
+
+                    <!-- Visual Progress Timeline Stepper -->
+                    <div class="py-6">
+                      <div class="relative flex items-center justify-between max-w-xl mx-auto">
+                        <!-- Connecting Bar -->
+                        <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1.5 w-full bg-slate-200 -z-0 rounded-full"></div>
+                        <div id="stepper-progress-bar" class="absolute left-0 top-1/2 -translate-y-1/2 h-1.5 w-full bg-emerald-500 -z-0 rounded-full transition-all duration-700"></div>
+
+                        <!-- Step 1: Booked -->
+                        <div class="flex flex-col items-center relative z-10">
+                          <div class="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs ring-4 ring-white shadow">
+                            <i class="fa-solid fa-check"></i>
+                          </div>
+                          <span class="text-xs font-bold text-slate-800 mt-2">Booked</span>
+                          <span class="text-[11px] text-slate-400">Delhi GPO</span>
+                        </div>
+
+                        <!-- Step 2: In Transit -->
+                        <div class="flex flex-col items-center relative z-10">
+                          <div id="step-transit-icon" class="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs ring-4 ring-white shadow">
+                            <i class="fa-solid fa-truck-fast"></i>
+                          </div>
+                          <span class="text-xs font-bold text-slate-800 mt-2">Dispatched</span>
+                          <span class="text-[11px] text-slate-400">National Sorting Hub</span>
+                        </div>
+
+                        <!-- Step 3: Out for Delivery -->
+                        <div class="flex flex-col items-center relative z-10">
+                          <div id="step-out-icon" class="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs ring-4 ring-white shadow">
+                            <i class="fa-solid fa-person-walking-luggage"></i>
+                          </div>
+                          <span class="text-xs font-bold text-slate-800 mt-2">Out for Delivery</span>
+                          <span class="text-[11px] text-slate-400">Ranchi Head Post</span>
+                        </div>
+
+                        <!-- Step 4: Delivered -->
+                        <div class="flex flex-col items-center relative z-10">
+                          <div id="step-delivered-icon" class="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs ring-4 ring-white shadow">
+                            <i class="fa-solid fa-house-chimney-check"></i>
+                          </div>
+                          <span class="text-xs font-bold text-slate-800 mt-2">Delivered</span>
+                          <span class="text-[11px] text-slate-400">Signed by Citizen</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Plain Human Speak History Breakdown (Fixing #2 Real World Match) -->
+                  <div class="mt-2 bg-white rounded-xl border border-slate-200 overflow-hidden text-xs">
+                    <div class="bg-slate-100 px-4 py-2 font-bold text-slate-700 flex justify-between items-center">
+                      <span>Human-Readable Activity Log</span>
+                      <span class="text-[11px] font-normal text-slate-500">Replaced internal codes (NSH/ICH) with plain terms</span>
+                    </div>
+                    <div class="divide-y divide-slate-100">
+                      <div class="p-3 flex items-start gap-3">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 mt-1.5"></span>
+                        <div class="flex-grow">
+                          <div class="flex justify-between font-semibold text-slate-800">
+                            <span>Delivered successfully to recipient</span>
+                            <span class="text-slate-400 font-normal">24 Oct, 03:40 PM</span>
+                          </div>
+                          <p class="text-slate-500 text-[11px]">Ranchi GPO delivery agent handed parcel to addressee.</p>
+                        </div>
+                      </div>
+                      <div class="p-3 flex items-start gap-3">
+                        <span class="w-2 h-2 rounded-full bg-slate-300 mt-1.5"></span>
+                        <div class="flex-grow">
+                          <div class="flex justify-between font-semibold text-slate-800">
+                            <span>Item arrived at delivery branch</span>
+                            <span class="text-slate-400 font-normal">24 Oct, 08:15 AM</span>
+                          </div>
+                          <p class="text-slate-500 text-[11px]">Processed at sorting center: Ranchi SO.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PANEL 2: POSTAGE CALCULATOR (Interactive & Instant) -->
+            <div id="calc-tab" class="tab-panel hidden">
+              <div class="max-w-3xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <!-- Controls -->
+                  <div class="space-y-4">
+                    <div>
+                      <label class="block text-xs font-bold text-slate-700 mb-1">Destination Scope</label>
+                      <div class="grid grid-cols-2 gap-2">
+                        <button type="button" id="btn-dest-dom" onclick="setTariffDest('domestic')" class="py-2 text-xs font-bold rounded-lg border-2 border-postRed bg-red-50 text-postRed">
+                          <i class="fa-solid fa-flag-in mr-1"></i> Domestic (India)
+                        </button>
+                        <button type="button" id="btn-dest-intl" onclick="setTariffDest('intl')" class="py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50">
+                          <i class="fa-solid fa-globe mr-1"></i> International
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label for="service-type" class="block text-xs font-bold text-slate-700 mb-1">Service Type</label>
+                      <select id="service-type" onchange="calculatePostage()" class="w-full bg-white border border-slate-300 rounded-lg text-sm px-3 py-2 font-medium focus:border-postRed">
+                        <option value="speed">Speed Post (Express Air / Fast Track)</option>
+                        <option value="registered">Registered Parcel (Safe &amp; Insured)</option>
+                        <option value="ordinary">Book Post / Printed Materials</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <div class="flex justify-between items-center mb-1">
+                        <label for="weight-slider" class="text-xs font-bold text-slate-700">Article Weight</label>
+                        <span id="weight-display" class="text-xs font-extrabold text-postRed font-mono bg-red-50 px-2 py-0.5 rounded border border-red-200">250 grams</span>
+                      </div>
+                      <input id="weight-slider" type="range" min="20" max="2000" step="10" value="250" 
+                             class="w-full accent-postRed cursor-pointer" oninput="updateWeight(this.value)">
+                      <div class="flex justify-between text-[10px] text-slate-400 mt-0.5 font-mono">
+                        <span>20g (Letter)</span>
+                        <span>1 kg</span>
+                        <span>2 kg (Parcel)</span>
+                      </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label for="origin-pin" class="block text-xs font-bold text-slate-700 mb-1">Sender Pincode</label>
+                        <input type="text" id="origin-pin" value="110001" maxlength="6" class="w-full border border-slate-300 rounded-lg text-xs px-3 py-2 font-mono" placeholder="e.g. 110001">
+                      </div>
+                      <div>
+                        <label for="dest-pin" class="block text-xs font-bold text-slate-700 mb-1">Recipient Pincode</label>
+                        <input type="text" id="dest-pin" value="560001" maxlength="6" class="w-full border border-slate-300 rounded-lg text-xs px-3 py-2 font-mono" placeholder="e.g. 560001">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Instant Calculation Breakdown Card -->
+                  <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-5 flex flex-col justify-between shadow-lg relative overflow-hidden">
+                    <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-red-600/20 rounded-full blur-2xl pointer-events-none"></div>
+                    
+                    <div>
+                      <div class="flex items-center justify-between pb-3 border-b border-slate-700">
+                        <span class="text-xs font-semibold text-slate-300">Instant Rate Breakdown</span>
+                        <span class="text-[11px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono">Standard GST Included</span>
+                      </div>
+
+                      <div class="space-y-2 mt-4 text-xs">
+                        <div class="flex justify-between text-slate-300">
+                          <span>Base Postage Fee:</span>
+                          <span class="font-mono" id="calc-base-fee">₹ 45.00</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                          <span>Distance Surcharge (Inter-State):</span>
+                          <span class="font-mono" id="calc-dist-fee">₹ 15.00</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                          <span>Applicable 18% GST:</span>
+                          <span class="font-mono" id="calc-tax-fee">₹ 10.80</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-700 mt-4">
+                      <div class="flex items-baseline justify-between">
+                        <div>
+                          <span class="text-xs text-slate-400 block">Total Payable Tariff</span>
+                          <span class="font-display text-3xl font-extrabold text-amber-400 font-mono" id="calc-total-fare">₹ 70.80</span>
+                        </div>
+                        <div class="text-right">
+                          <span class="text-xs text-slate-400 block">Est. Delivery</span>
+                          <span class="text-xs font-bold text-emerald-400" id="calc-delivery-window">2 - 3 Working Days</span>
+                        </div>
+                      </div>
+
+                      <button class="w-full mt-4 bg-postRed hover:bg-postRed-light text-white text-xs font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-box-archive"></i>
+                        <span>Create Digital Shipping Label</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PANEL 3: FIND PINCODE & OFFICE (Interactive Live Search) -->
+            <div id="pin-tab" class="tab-panel hidden">
+              <div class="max-w-3xl mx-auto">
+                <div class="mb-4">
+                  <label for="pincode-search-box" class="block text-xs font-bold text-slate-800 mb-1">
+                    Search by City, Area, or 6-Digit PIN Code
+                  </label>
+                  <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                    <input type="text" id="pincode-search-box" oninput="liveFilterPincodes(this.value)" placeholder="Type 'Connaught Place', 'Ranchi', 'Koramangala', or '110001'..."
+                           class="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-slate-300 focus:border-postRed text-sm text-slate-900 transition-colors">
+                  </div>
+                  <p class="text-[11px] text-slate-500 mt-1">Instant database filter &bull; No page reloads or broken dropdowns</p>
+                </div>
+
+                <!-- Suggested List Result -->
+                <div id="pincode-results-list" class="space-y-2.5 max-h-64 overflow-y-auto pr-1">
+                  <!-- Seed Items populated by JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- PANEL 4: SCHEDULE PICKUP -->
+            <div id="book-tab" class="tab-panel hidden">
+              <div class="max-w-3xl mx-auto text-center py-4">
+                <div class="w-14 h-14 bg-red-100 text-postRed rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl">
+                  <i class="fa-solid fa-house-laptop"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Doorstep Parcel Pickup Service</h3>
+                <p class="text-xs text-slate-500 max-w-md mx-auto mt-1">
+                  Postman comes to your residence or enterprise to weigh, seal, and collect consignments.
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg mx-auto mt-5 text-left text-xs">
+                  <div class="p-3 rounded-xl border border-slate-200 bg-slate-50">
+                    <span class="block font-bold text-slate-800">1. Enter Address</span>
+                    <span class="text-slate-500 text-[11px]">Pin &amp; contact verification</span>
+                  </div>
+                  <div class="p-3 rounded-xl border border-slate-200 bg-slate-50">
+                    <span class="block font-bold text-slate-800">2. Select Slot</span>
+                    <span class="text-slate-500 text-[11px]">Morning / Afternoon</span>
+                  </div>
+                  <div class="p-3 rounded-xl border border-slate-200 bg-slate-50">
+                    <span class="block font-bold text-slate-800">3. Handover</span>
+                    <span class="text-slate-500 text-[11px]">Instant SMS receipt</span>
+                  </div>
+                </div>
+
+                <button class="mt-6 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-postRed hover:bg-postRed-dark text-white font-bold text-xs shadow-md transition-all">
+                  <i class="fa-solid fa-calendar-check"></i>
+                  <span>Book Pickup Slot (Instant)</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= CITIZEN SERVICES GRID (CLEAN HIERARCHY) ================= -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-3">
+        <div>
+          <span class="text-xs font-bold text-postRed uppercase tracking-wider">Citizen Essentials</span>
+          <h2 class="font-display text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
+            Core Postal &amp; Financial Services
+          </h2>
+        </div>
+        <a href="#" class="text-xs font-bold text-postRed hover:text-postRed-dark flex items-center gap-1 group">
+          <span>View all Departmental schemes</span>
+          <i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Service 1: Speed Post -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-lg hover:border-red-200 transition-all group flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-red-100 text-postRed flex items-center justify-center text-xl mb-4 group-hover:bg-postRed group-hover:text-white transition-colors">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <h3 class="font-bold text-base text-slate-900 group-hover:text-postRed transition-colors">Speed Post Express</h3>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+              India's largest domestic high-speed network guaranteeing prompt time-bound delivery across 19,000+ pin codes.
+            </p>
+          </div>
+          <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-postRed">
+            <span>Calculate Rates</span>
+            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+          </div>
+        </div>
+
+        <!-- Service 2: Post Office Savings Bank -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-lg hover:border-amber-200 transition-all group flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl mb-4 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+              <i class="fa-solid fa-piggy-bank"></i>
+            </div>
+            <h3 class="font-bold text-base text-slate-900 group-hover:text-amber-700 transition-colors">Savings Bank &amp; PPF</h3>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+              High-yield government backed savings: Sukanya Samriddhi Yojana (SSY), Senior Citizen Savings Scheme (SCSS), &amp; NSC.
+            </p>
+          </div>
+          <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-700">
+            <span>Interest Rates (2026)</span>
+            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+          </div>
+        </div>
+
+        <!-- Service 3: India Post Payments Bank -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-lg hover:border-blue-200 transition-all group flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-xl mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <i class="fa-solid fa-mobile-screen-button"></i>
+            </div>
+            <h3 class="font-bold text-base text-slate-900 group-hover:text-blue-700 transition-colors">IPPB Digital Banking</h3>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+              Aadhaar-enabled payment system (AePS), QR transactions, and paperless doorstep banking through your local postman.
+            </p>
+          </div>
+          <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-700">
+            <span>Digital Passbook</span>
+            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+          </div>
+        </div>
+
+        <!-- Service 4: Postal Life Insurance -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-lg hover:border-emerald-200 transition-all group flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl mb-4 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+              <i class="fa-solid fa-shield-heart"></i>
+            </div>
+            <h3 class="font-bold text-base text-slate-900 group-hover:text-emerald-700 transition-colors">Postal Life Insurance (PLI)</h3>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+              High bonus and low premium plans including Suraksha, Santosh, and Rural Postal Life Insurance (RPLI).
+            </p>
+          </div>
+          <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700">
+            <span>Premium Calculator</span>
+            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= HCI BEFORE VS AFTER CASE STUDY DRAWER / MODAL ================= -->
+    <section class="bg-slate-900 text-white py-12 px-4 sm:px-6">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center max-w-2xl mx-auto mb-10">
+          <span class="text-xs font-bold uppercase tracking-widest text-amber-400">Heuristic Usability Comparison</span>
+          <h2 class="font-display text-2xl sm:text-3xl font-bold mt-1">How This Prototype Fixes Real HCI Flaws</h2>
+          <p class="text-slate-400 text-xs sm:text-sm mt-2">
+            Direct comparison between indiapost.gov.in legacy design and human-centered design principles.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Card 1 -->
+          <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-5">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="w-7 h-7 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center font-bold text-xs">
+                #1
+              </span>
+              <h4 class="font-bold text-sm text-white">CAPTCHA Barrier Eliminated</h4>
+            </div>
+            <div class="text-xs space-y-2">
+              <p class="text-red-300 bg-red-950/40 p-2 rounded border border-red-900/60">
+                <strong>Legacy:</strong> Required solving a mathematical CAPTCHA (e.g. 7 - 2 = ?) for routine package tracking, causing high abandonment.
+              </p>
+              <p class="text-emerald-300 bg-emerald-950/40 p-2 rounded border border-emerald-900/60">
+                <strong>HCI Solution:</strong> Zero CAPTCHA for standard queries with client-side regex format checking and automated rate limiting.
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-5">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">
+                #2
+              </span>
+              <h4 class="font-bold text-sm text-white">Plain Human Mental Model</h4>
+            </div>
+            <div class="text-xs space-y-2">
+              <p class="text-red-300 bg-red-950/40 p-2 rounded border border-red-900/60">
+                <strong>Legacy:</strong> Outputted dense technical tables with abbreviations like "Item Dispatched to NSH New Delhi DPT".
+              </p>
+              <p class="text-emerald-300 bg-emerald-950/40 p-2 rounded border border-emerald-900/60">
+                <strong>HCI Solution:</strong> Visual progression stepper with plain English/vernacular status: "In Transit &bull; Sorting Center".
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-5">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">
+                #3
+              </span>
+              <h4 class="font-bold text-sm text-white">Direct PIN Code Retrieval</h4>
+            </div>
+            <div class="text-xs space-y-2">
+              <p class="text-red-300 bg-red-950/40 p-2 rounded border border-red-900/60">
+                <strong>Legacy:</strong> Required selecting State -> District -> Postal Division across 4 sequential page refreshes.
+              </p>
+              <p class="text-emerald-300 bg-emerald-950/40 p-2 rounded border border-emerald-900/60">
+                <strong>HCI Solution:</strong> Single fuzzy search bar with instant autocomplete and direct delivery capability indicators.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="bg-slate-950 text-slate-400 text-xs py-10 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <h4 class="text-white font-bold text-sm mb-3">Postal Services</h4>
+          <ul class="space-y-2">
+            <li><a href="#" class="hover:text-white transition-colors">Domestic Speed Post</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">International EMS</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Commercial Logistics</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Postage Calculator</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-bold text-sm mb-3">Citizen Banking</h4>
+          <ul class="space-y-2">
+            <li><a href="#" class="hover:text-white transition-colors">Sukanya Samriddhi</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Public Provident Fund</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Senior Citizen Scheme</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">National Savings Cert.</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-bold text-sm mb-3">Help &amp; Support</h4>
+          <ul class="space-y-2">
+            <li><a href="#" class="hover:text-white transition-colors">Toll-Free: 1800-266-6868</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">File a Grievance (CPGRAMS)</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Feedback &amp; Suggestions</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">RTI Portal</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-bold text-sm mb-3">HCI Evaluation Info</h4>
+          <p class="text-slate-400 text-[11px] leading-relaxed">
+            This prototype addresses human-computer interaction deficiencies on government public utilities, targeting cognitive friction reduction, accessibility, and mental model convergence.
+          </p>
+        </div>
+      </div>
+
+      <div class="pt-6 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <p class="text-slate-500 text-[11px]">
+          &copy; India Post Prototype &bull; Redesigned for Academic HCI Usability Study.
+        </p>
+        <div class="flex items-center gap-4 text-[11px]">
+          <span class="text-emerald-400"><i class="fa-solid fa-universal-access mr-1"></i> WCAG 2.1 AA Compliant</span>
+          <span class="text-slate-500">|</span>
+          <span class="text-slate-400">Zero-Reload Single Page Architecture</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= FLOATING HELP & CHATBOT MODAL ================= -->
+  <div class="fixed bottom-6 right-6 z-40">
+    <button id="help-drawer-toggle" onclick="toggleHelpDrawer()" class="w-13 h-13 px-4 py-3 bg-postRed hover:bg-postRed-dark text-white rounded-full shadow-2xl flex items-center gap-2 font-bold text-sm transition-all transform hover:scale-105">
+      <i class="fa-solid fa-headset text-lg"></i>
+      <span class="hidden sm:inline">Dak Sahayak</span>
+    </button>
+  </div>
+
+  <!-- Help Drawer Flyout -->
+  <div id="help-drawer" class="fixed bottom-20 right-6 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 p-5 z-40 hidden transition-all">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-full bg-red-100 text-postRed flex items-center justify-center font-bold text-xs">
+          <i class="fa-solid fa-robot"></i>
+        </div>
+        <div>
+          <h4 class="font-bold text-xs text-slate-800">Dak Sahayak (Citizen Assistant)</h4>
+          <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span> Online &bull; Ready to help
+          </span>
+        </div>
+      </div>
+      <button onclick="toggleHelpDrawer()" class="text-slate-400 hover:text-slate-600 text-sm">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="text-xs space-y-2 mb-3">
+      <div class="bg-slate-100 text-slate-800 p-2.5 rounded-xl rounded-tl-none">
+        Namaste! Need assistance tracking a package, calculating postage, or finding your nearest post office?
+      </div>
+      <div class="flex flex-wrap gap-1.5">
+        <button onclick="quickHelp('track')" class="bg-red-50 text-postRed border border-red-200 px-2 py-1 rounded text-[11px] font-medium hover:bg-red-100">Where is my parcel?</button>
+        <button onclick="quickHelp('speed_rates')" class="bg-red-50 text-postRed border border-red-200 px-2 py-1 rounded text-[11px] font-medium hover:bg-red-100">Speed post charges?</button>
+        <button onclick="quickHelp('branch')" class="bg-red-50 text-postRed border border-red-200 px-2 py-1 rounded text-[11px] font-medium hover:bg-red-100">Post office timings?</button>
+      </div>
+    </div>
+
+    <div id="help-bot-reply" class="text-xs p-2.5 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl hidden">
+      <!-- Dynamic reply -->
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT CONTROLLERS ================= -->
+  <script>
+    // --- PINCODE DATABASE FOR LIVE INSTANT LOOKUP ---
+    const PINCODE_DATABASE = [
+      { pin: "110001", name: "New Delhi GPO", district: "Central Delhi", state: "Delhi", type: "Head Post Office", speedPost: true },
+      { pin: "110006", name: "Chandni Chowk SO", district: "North Delhi", state: "Delhi", type: "Sub Post Office", speedPost: true },
+      { pin: "560001", name: "Bengaluru GPO", district: "Bengaluru Urban", state: "Karnataka", type: "General Post Office", speedPost: true },
+      { pin: "560034", name: "Koramangala VI Block", district: "Bengaluru Urban", state: "Karnataka", type: "Sub Post Office", speedPost: true },
+      { pin: "400001", name: "Mumbai GPO (Fort)", district: "Mumbai City", state: "Maharashtra", type: "General Post Office", speedPost: true },
+      { pin: "700001", name: "Kolkata GPO", district: "Kolkata", state: "West Bengal", type: "General Post Office", speedPost: true },
+      { pin: "600001", name: "Chennai GPO", district: "Chennai", state: "Tamil Nadu", type: "General Post Office", speedPost: true },
+      { pin: "834001", name: "Ranchi GPO", district: "Ranchi", state: "Jharkhand", type: "Head Post Office", speedPost: true }
+    ];
+
+    // --- ACCESSIBILITY STATES ---
+    let currentFontSizeOffset = 0;
+    let isHighContrast = false;
+    let isHciInspectorActive = false;
+    let currentTariffDest = 'domestic';
+
+    // 1. Accessibility Font Scaler
+    function adjustFontSize(delta) {
+      const root = document.getElementById('app-root');
+      if (delta === 0) {
+        currentFontSizeOffset = 0;
+      } else {
+        currentFontSizeOffset = Math.max(-2, Math.min(4, currentFontSizeOffset + delta));
+      }
+      
+      const sizeClasses = ['text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl'];
+      const defaultIndex = 2; // text-base
+      const targetClass = sizeClasses[defaultIndex + currentFontSizeOffset] || 'text-base';
+
+      sizeClasses.forEach(c => root.classList.remove(c));
+      root.classList.add(targetClass);
+    }
+
+    // 2. High Contrast Toggle
+    function toggleHighContrast() {
+      isHighContrast = !isHighContrast;
+      document.body.classList.toggle('contrast-mode', isHighContrast);
+    }
+
+    // 3. Vernacular Language Switcher Mock
+    function changeLanguage(lang) {
+      const phrases = {
+        en: { title: "What would you like to do today?", track: "Track Consignment" },
+        hi: { title: "आज आप क्या सेवा लेना चाहेंगे?", track: "कंसाइनमेंट ट्रैक करें" },
+        bn: { title: "আজ আপনি কি সেবা নিতে চান?", track: "পার্সেল ট্র্যাক করুন" },
+        ta: { title: "இன்று நீங்கள் என்ன செய்ய விரும்புகிறீர்கள்?", track: "தபால்களைக் கண்காணிக்கவும்" }
+      };
+
+      const selected = phrases[lang] || phrases.en;
+      const h1 = document.querySelector('h1');
+      if (h1) h1.textContent = selected.title;
+    }
+
+    // 4. Tab Navigation Switcher
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-white', 'text-postRed', 'shadow-sm', 'border-slate-200/80');
+        btn.classList.add('text-slate-600');
+        btn.setAttribute('aria-selected', 'false');
+      });
+
+      const selectedPanel = document.getElementById(tabId);
+      if (selectedPanel) selectedPanel.classList.remove('hidden');
+
+      const btnIdMap = {
+        'track-tab': 'btn-tab-track',
+        'calc-tab': 'btn-tab-calc',
+        'pin-tab': 'btn-tab-pin',
+        'book-tab': 'btn-tab-book'
+      };
+
+      const activeBtn = document.getElementById(btnIdMap[tabId]);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-600');
+        activeBtn.classList.add('bg-white', 'text-postRed', 'shadow-sm', 'border-slate-200/80');
+        activeBtn.setAttribute('aria-selected', 'true');
+      }
+
+      // If switching to PIN tab, populate the initial list
+      if (tabId === 'pin-tab') {
+        liveFilterPincodes('');
+      }
+    }
+
+    // 5. Tracking Validation & Simulation
+    function handleTrackingValidation(val) {
+      const clean = val.toUpperCase().trim();
+      document.getElementById('char-counter').textContent = `${clean.length}/13`;
+      const errBox = document.getElementById('tracking-error');
+
+      if (clean.length > 0 && clean.length < 13) {
+        errBox.classList.remove('hidden');
+        document.getElementById('tracking-error-msg').textContent = `Consignments require 13 characters (${13 - clean.length} remaining).`;
+      } else {
+        errBox.classList.add('hidden');
+      }
+    }
+
+    function loadSampleTracking(num, type) {
+      const input = document.getElementById('tracking-input');
+      input.value = num;
+      handleTrackingValidation(num);
+      trackConsignment(type);
+    }
+
+    function trackConsignment(overrideType) {
+      const input = document.getElementById('tracking-input');
+      const val = input.value.trim().toUpperCase();
+      const errBox = document.getElementById('tracking-error');
+      const resultBox = document.getElementById('tracking-result-box');
+
+      if (val.length !== 13) {
+        errBox.classList.remove('hidden');
+        document.getElementById('tracking-error-msg').textContent = "Please enter a valid 13-character tracking number (e.g. IN982341902IN).";
+        resultBox.classList.add('hidden');
+        return;
+      }
+
+      errBox.classList.add('hidden');
+      resultBox.classList.remove('hidden');
+
+      const isDelivered = overrideType === 'transit' ? false : (val.endsWith('IN') || overrideType === 'delivered');
+      
+      document.getElementById('res-consignment-id').textContent = val;
+      const badge = document.getElementById('res-badge');
+      const progressBar = document.getElementById('stepper-progress-bar');
+      const transitIcon = document.getElementById('step-transit-icon');
+      const outIcon = document.getElementById('step-out-icon');
+      const deliveredIcon = document.getElementById('step-delivered-icon');
+      const resDate = document.getElementById('res-date');
+
+      if (isDelivered) {
+        badge.textContent = "Delivered";
+        badge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300";
+        progressBar.style.width = "100%";
+        progressBar.className = "absolute left-0 top-1/2 -translate-y-1/2 h-1.5 w-full bg-emerald-500 -z-0 rounded-full transition-all duration-700";
+        transitIcon.className = "w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs ring-4 ring-white shadow";
+        outIcon.className = "w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs ring-4 ring-white shadow";
+        deliveredIcon.className = "w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs ring-4 ring-white shadow";
+        resDate.textContent = "24 Oct, 03:40 PM";
+      } else {
+        badge.textContent = "In Transit";
+        badge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300";
+        progressBar.style.width = "50%";
+        progressBar.className = "absolute left-0 top-1/2 -translate-y-1/2 h-1.5 bg-amber-500 -z-0 rounded-full transition-all duration-700";
+        transitIcon.className = "w-9 h-9 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-xs ring-4 ring-white shadow";
+        outIcon.className = "w-9 h-9 rounded-full bg-slate-300 text-slate-600 flex items-center justify-center font-bold text-xs ring-4 ring-white shadow";
+        deliveredIcon.className = "w-9 h-9 rounded-full bg-slate-300 text-slate-600 flex items-center justify-center font-bold text-xs ring-4 ring-white shadow";
+        resDate.textContent = "Expected: Tomorrow by 5:00 PM";
+      }
+
+      resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // 6. Postage Calculator Logic
+    function setTariffDest(dest) {
+      currentTariffDest = dest;
+      const domBtn = document.getElementById('btn-dest-dom');
+      const intlBtn = document.getElementById('btn-dest-intl');
+
+      if (dest === 'domestic') {
+        domBtn.className = "py-2 text-xs font-bold rounded-lg border-2 border-postRed bg-red-50 text-postRed";
+        intlBtn.className = "py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50";
+      } else {
+        intlBtn.className = "py-2 text-xs font-bold rounded-lg border-2 border-postRed bg-red-50 text-postRed";
+        domBtn.className = "py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50";
+      }
+      calculatePostage();
+    }
+
+    function updateWeight(val) {
+      document.getElementById('weight-display').textContent = val >= 1000 ? `${(val / 1000).toFixed(1)} kg` : `${val} grams`;
+      calculatePostage();
+    }
+
+    function calculatePostage() {
+      const weight = parseInt(document.getElementById('weight-slider').value, 10);
+      const service = document.getElementById('service-type').value;
+
+      let base = 25;
+      if (service === 'speed') {
+        base = weight <= 50 ? 35 : 35 + Math.ceil((weight - 50) / 50) * 12;
+      } else if (service === 'registered') {
+        base = weight <= 50 ? 25 : 25 + Math.ceil((weight - 50) / 100) * 8;
+      } else {
+        base = Math.max(15, Math.ceil(weight / 100) * 5);
+      }
+
+      if (currentTariffDest === 'intl') {
+        base = base * 4.5;
+      }
+
+      const dist = currentTariffDest === 'intl' ? 120 : 15;
+      const subtotal = base + dist;
+      const tax = subtotal * 0.18;
+      const total = subtotal + tax;
+
+      document.getElementById('calc-base-fee').textContent = `₹ ${base.toFixed(2)}`;
+      document.getElementById('calc-dist-fee').textContent = `₹ ${dist.toFixed(2)}`;
+      document.getElementById('calc-tax-fee').textContent = `₹ ${tax.toFixed(2)}`;
+      document.getElementById('calc-total-fare').textContent = `₹ ${total.toFixed(2)}`;
+
+      const windowSpan = document.getElementById('calc-delivery-window');
+      if (currentTariffDest === 'intl') {
+        windowSpan.textContent = "5 - 8 Business Days";
+      } else {
+        windowSpan.textContent = service === 'speed' ? "1 - 2 Working Days" : "3 - 5 Working Days";
+      }
+    }
+
+    // 7. Live Pincode Filter
+    function liveFilterPincodes(query) {
+      const q = query.toLowerCase().trim();
+      const container = document.getElementById('pincode-results-list');
+      container.innerHTML = '';
+
+      const filtered = PINCODE_DATABASE.filter(item => {
+        return item.pin.includes(q) || 
+               item.name.toLowerCase().includes(q) || 
+               item.district.toLowerCase().includes(q) ||
+               item.state.toLowerCase().includes(q);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 text-center text-xs text-slate-500 bg-slate-50 rounded-xl border border-slate-200">
+            <i class="fa-solid fa-circle-question text-lg text-slate-400 mb-1 block"></i>
+            No post office found for "<strong>${query}</strong>". Try entering another city or PIN.
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(item => {
+        const row = document.createElement('div');
+        row.className = "p-3.5 bg-white border border-slate-200 hover:border-red-300 rounded-xl flex items-center justify-between text-xs transition-colors";
+        row.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-red-50 text-postRed flex items-center justify-center font-bold text-sm">
+              <i class="fa-solid fa-envelope"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-900">${item.name}</span>
+                <span class="font-mono bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-bold">${item.pin}</span>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-0.5">${item.district}, ${item.state} &bull; ${item.type}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              Speed Post Counter
+            </span>
+            <button onclick="selectPincode('${item.pin}')" class="px-3 py-1.5 bg-slate-100 hover:bg-postRed hover:text-white rounded-lg text-xs font-bold transition-colors">
+              Select
+            </button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function selectPincode(pin) {
+      switchTab('calc-tab');
+      document.getElementById('dest-pin').value = pin;
+    }
+
+    // 8. HCI Inspector Mode
+    function toggleHciInspector() {
+      isHciInspectorActive = !isHciInspectorActive;
+      const annotations = document.querySelectorAll('.hci-annotation');
+      const toggleBtn = document.getElementById('toggle-hci-btn');
+      const toggleText = document.getElementById('hci-toggle-text');
+
+      if (isHciInspectorActive) {
+        annotations.forEach(a => a.classList.remove('hidden'));
+        toggleBtn.classList.remove('bg-amber-500', 'hover:bg-amber-400');
+        toggleBtn.classList.add('bg-red-600', 'text-white');
+        toggleText.textContent = "Disable HCI Mode";
+      } else {
+        annotations.forEach(a => a.classList.add('hidden'));
+        toggleBtn.classList.remove('bg-red-600', 'text-white');
+        toggleBtn.classList.add('bg-amber-500', 'text-slate-950');
+        toggleText.textContent = "Enable HCI Inspector Mode";
+      }
+    }
+
+    function filterHeuristic(category) {
+      if (!isHciInspectorActive) {
+        toggleHciInspector();
+      }
+      const annotations = document.querySelectorAll('.hci-annotation');
+      annotations.forEach(a => {
+        if (category === 'all' || a.getAttribute('data-hci-category') === category) {
+          a.classList.remove('hidden');
+        } else {
+          a.classList.add('hidden');
+        }
+      });
+    }
+
+    // 9. Floating Help Drawer
+    function toggleHelpDrawer() {
+      const drawer = document.getElementById('help-drawer');
+      drawer.classList.toggle('hidden');
+    }
+
+    function quickHelp(topic) {
+      const replyBox = document.getElementById('help-bot-reply');
+      replyBox.classList.remove('hidden');
+
+      if (topic === 'track') {
+        replyBox.innerHTML = "<strong>Tracking Guide:</strong> Enter your 13-digit tracking number in the 'Track Consignment' console above without spaces or CAPTCHA.";
+        switchTab('track-tab');
+      } else if (topic === 'speed_rates') {
+        replyBox.innerHTML = "<strong>Speed Post Rates:</strong> Up to 50g locally is ₹15; across India is ₹35 + GST. Use our interactive tab to adjust weights.";
+        switchTab('calc-tab');
+      } else if (topic === 'branch') {
+        replyBox.innerHTML = "<strong>Branch Hours:</strong> Most Head Post Offices operate from 09:00 AM to 05:00 PM, Monday through Saturday.";
+        switchTab('pin-tab');
+      }
+    }
+
+    // Initialize initial state on window load
+    window.onload = function() {
+      calculatePostage();
+      liveFilterPincodes('');
+    };
+  </script>
+</body>
+</html>
