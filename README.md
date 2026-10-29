@@ -1,48 +1,54 @@
-# India Post Web Portal – Usability Evaluation & Redesign Prototype
+# India Post Portal – HCI Case Study & Front-End Redesign Prototype
 
-An academic Human-Computer Interaction (HCI) case study and interactive front-end prototype identifying usability friction points in the official India Post digital portal and proposing human-centered design solutions based on Nielsen’s 10 Usability Heuristics and WCAG 2.1 AA standards.
+An academic Human-Computer Interaction (HCI) usability evaluation and functional front-end redesign prototype addressing cognitive friction, layout clutter, and accessibility issues on the official India Post digital web portal.
 
 ---
 
-## 🔗 Live Prototype
-- **Live Demo:** [https://<your-username>.github.io/<repository-name>/](https://<your-username>.github.io/<repository-name>/)
+## 🌐 Live Prototype & Links
+
+- **Live Interactive Website:** [https://salman-72-56.github.io/india-post-hci-redesign/](https://salman-72-56.github.io/india-post-hci-redesign/)
+- **GitHub Repository:** [https://github.com/Salman-72-56/india-post-hci-redesign](https://github.com/Salman-72-56/india-post-hci-redesign)
 - **Coursework:** Human-Computer Interaction (HCI)
+- **Author:** MD Salman
 
 ---
 
-## 📌 Project Overview
+## 📌 Problem Statement & HCI Background
 
-The official India Post portal serves millions of citizens daily, handling core public services like consignment tracking, postage calculation, and pincode location. However, its existing interface presents several critical HCI challenges:
-- High cognitive load caused by dense departmental news feeds and buried core utilities.
-- Onerous math puzzle CAPTCHAs hindering fast consignment lookups.
-- Cryptic technical transit codes (`NSH DPT`, `ICH SUB`) lacking user-friendly delivery context.
-- Inconsistent accessibility support across varied devices and screen readers.
+The official India Post portal handles essential public utility services for millions of daily visitors, including consignment tracking, postage calculation, and pincode lookups. However, a heuristic evaluation reveals several systemic usability flaws:
 
-This repository hosts a functional, single-page prototype that resolves these issues with a modern, task-centric architecture.
+1. **High Cognitive Overhead (Heuristic #8 - Aesthetic & Minimalist Design):** The default landing page prioritizes internal departmental bulletins, tenders, and dense multi-level navigation trees over the top core actions users visit the site to perform.
+2. **Excessive Interaction Friction (Heuristic #5 - Error Prevention):** Tracking simple packages requires solving arithmetic CAPTCHAs, creating barriers for elderly users, people with cognitive impairments, or users on mobile devices.
+3. **Cryptic System Terminology (Heuristic #1 & #2 - Visibility of System Status / Match with Real World):** Tracking logs display internal backend transit acronyms (such as `NSH DPT`, `ICH SUB`) without human-readable transit explanations.
+4. **Suboptimal Accessibility Compliance:** Inadequate contrast ratios and limited responsive viewport optimization create barriers for screen-reader and low-vision accessibility.
 
 ---
 
-## 🛠️ Key Usability & HCI Enhancements
+## 🚀 Key Usability Solutions Implemented
 
-| Feature / Fix | Usability Heuristic Addressed | Description |
+This prototype addresses the core usability issues through a clean, single-page, task-first interface:
+
+| Feature / UI Component | Usability Heuristic Addressed | Design Fix & Implementation |
 | :--- | :--- | :--- |
-| **Task-First Action Hub** | Heuristic #8: Aesthetic & Minimalist Design | Replaces clustered links with a quick 4-tab utility card (Track, Calculate, Pincode, Pickup). |
-| **Frictionless Tracking** | Heuristic #5: Error Prevention | Eliminates arbitrary CAPTCHAs and adds inline 13-character formatting validation. |
-| **Intuitive Delivery Pipeline** | Heuristic #1 & #2: Visibility of System Status | Converts backend logistics acronyms into a visual 4-stage tracking timeline. |
-| **Universal Accessibility** | Heuristic #7: Flexibility & Efficiency of Use | Includes interactive high-contrast modes and direct font-scaling controls (WCAG 2.1 AA). |
-| **Interactive HCI Inspector** | Heuristic Review Mode | Built-in inspection mode highlighting specific design decisions mapped to Nielsen's heuristics. |
+| **Task-First Action Hub** | **#8: Minimalist Design** | Replaces buried navigation links with an instant 4-tab utility console for primary tasks: *Track Consignment, Calculate Postage, Find Pincode, and Request Pickup*. |
+| **Frictionless Tracking Engine** | **#5: Error Prevention** | Eliminates obstructive CAPTCHA puzzles; incorporates inline 13-character validation with one-click test numbers for demoing delivery states. |
+| **Visual Delivery Pipeline** | **#1 & #2: Visibility of Status** | Replaces technical backend logistics codes with an intuitive 4-stage visual timeline (Booked → Dispatched → In Transit → Out for Delivery). |
+| **Dynamic Postage Calculator** | **#6: Recognition over Recall** | Provides real-time rate estimation based on destination type and package weight with immediate breakdown cards. |
+| **Universal Accessibility (WCAG 2.1 AA)** | **#7: Flexibility & Efficiency** | Features built-in font-size scaling (`A-`, `A`, `A+`), high-contrast vision mode, and multi-language support toggles. |
+| **Interactive HCI Inspector** | **Heuristic Review Mode** | Built-in inspection mode highlighting specific design decisions mapped directly to Nielsen's Usability Heuristics. |
 
 ---
 
-## 💻 Tech Stack
-- **HTML5** (Semantic structure & ARIA accessibility)
-- **Tailwind CSS / Pure CSS3** (Responsive task cards and layout)
-- **Vanilla JavaScript** (Dynamic status timeline, postage estimator logic, and heuristic overlay toggles)
+## 💻 Tech Stack & Architecture
+
+- **HTML5:** Semantic document outline with accessible ARIA tags and landmark regions.
+- **Tailwind CSS / Pure CSS3:** Responsive grid layouts, modern typography hierarchy, and custom dark/high-contrast styling.
+- **Vanilla JavaScript (ES6+):** Client-side tab switching, interactive consignment status generation, dynamic postage calculation, and heuristic overlay toggles. Zero heavy external dependencies.
 
 ---
 
-## 🚀 How to Run Locally
+## 🛠️ How to Run Locally
 
-1. Clone this repository:
+1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/](https://github.com/)<your-username>/<repository-name>.git
+   git clone [https://github.com/Salman-72-56/india-post-hci-redesign.git](https://github.com/Salman-72-56/india-post-hci-redesign.git)
